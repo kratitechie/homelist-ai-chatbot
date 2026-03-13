@@ -1,0 +1,499 @@
+<!-- ============================================================
+     HOMELIST HOMIE WIDGET — PASTE EVERYTHING BELOW INTO WORDPRESS
+     ============================================================ -->
+
+<style>
+/* === WIDGET STYLES === */
+#homie-widget * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+#homie-fab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 62px;
+  height: 62px;
+  background: linear-gradient(135deg, #e67e22, #d35400);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(230,126,34,0.5);
+  z-index: 99999;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: none;
+  font-size: 26px;
+}
+#homie-fab:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(230,126,34,0.6); }
+
+#homie-box {
+  position: fixed;
+  bottom: 105px;
+  right: 28px;
+  width: 360px;
+  height: 540px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 50px rgba(0,0,0,0.18);
+  display: none;
+  flex-direction: column;
+  z-index: 99998;
+  overflow: hidden;
+  animation: homie-pop 0.25s ease;
+}
+@keyframes homie-pop {
+  from { opacity: 0; transform: scale(0.85) translateY(20px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+#homie-box.open { display: flex; }
+
+#homie-header {
+  background: linear-gradient(135deg, #1a5276, #2980b9);
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+#homie-avatar {
+  width: 40px; height: 40px;
+  background: #e67e22;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+#homie-header-text h3 { margin: 0; color: #fff; font-size: 15px; font-weight: 700; }
+#homie-header-text p  { margin: 2px 0 0; color: #aed6f1; font-size: 11px; }
+#homie-close {
+  margin-left: auto; background: none; border: none;
+  color: #fff; font-size: 20px; cursor: pointer; opacity: 0.7; padding: 0;
+}
+#homie-close:hover { opacity: 1; }
+
+#homie-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #f8f9fa;
+}
+#homie-messages::-webkit-scrollbar { width: 4px; }
+#homie-messages::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+
+.homie-msg {
+  max-width: 82%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+.homie-msg.bot {
+  background: #fff;
+  color: #2c3e50;
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  align-self: flex-start;
+}
+.homie-msg.user {
+  background: linear-gradient(135deg, #e67e22, #d35400);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+  align-self: flex-end;
+}
+.homie-typing {
+  display: flex; gap: 4px; align-items: center;
+  padding: 10px 14px;
+  background: #fff;
+  border-radius: 16px;
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  align-self: flex-start;
+  width: fit-content;
+}
+.homie-typing span {
+  width: 7px; height: 7px;
+  background: #aaa;
+  border-radius: 50%;
+  animation: homie-bounce 1.2s infinite;
+}
+.homie-typing span:nth-child(2) { animation-delay: 0.2s; }
+.homie-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes homie-bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
+
+#homie-input-area {
+  padding: 12px;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 8px;
+  background: #fff;
+}
+#homie-input {
+  flex: 1;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 24px;
+  padding: 10px 16px;
+  font-size: 13.5px;
+  outline: none;
+  transition: border-color 0.2s;
+  resize: none;
+}
+#homie-input:focus { border-color: #e67e22; }
+#homie-send {
+  width: 42px; height: 42px;
+  background: linear-gradient(135deg, #e67e22, #d35400);
+  border: none; border-radius: 50%;
+  color: #fff; font-size: 18px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+#homie-send:hover { transform: scale(1.08); }
+
+#homie-footer {
+  text-align: center;
+  font-size: 10px;
+  color: #bbb;
+  padding: 4px 0 8px;
+  background: #fff;
+}
+#homie-footer a { color: #bbb; text-decoration: none; }
+
+.homie-lead-form {
+  background: #fff3e0;
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 4px;
+  border: 1px solid #f0c080;
+}
+.homie-lead-form input {
+  width: 100%; padding: 8px 10px;
+  border: 1px solid #ddd; border-radius: 8px;
+  margin: 4px 0; font-size: 13px; outline: none;
+}
+.homie-lead-form input:focus { border-color: #e67e22; }
+.homie-lead-form button {
+  width: 100%; padding: 9px;
+  background: linear-gradient(135deg, #1a5276, #2980b9);
+  color: #fff; border: none; border-radius: 8px;
+  font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 6px;
+}
+.homie-lead-form button:hover { opacity: 0.9; }
+</style>
+
+<div id="homie-widget">
+  <!-- FAB Button -->
+  <button id="homie-fab" onclick="homieToggle()" title="Chat with Homie">🏠</button>
+
+  <!-- Chat Box -->
+  <div id="homie-box">
+    <div id="homie-header">
+      <div id="homie-avatar">🏠</div>
+      <div id="homie-header-text">
+        <h3>Homie — Homelist Assistant</h3>
+        <p>🟢 Online · Real Estate Expert</p>
+      </div>
+      <button id="homie-close" onclick="homieToggle()">✕</button>
+    </div>
+
+    <div id="homie-messages"></div>
+
+    <div id="homie-input-area">
+      <input id="homie-input" type="text" placeholder="Ask about properties, rent, buy..." onkeydown="if(event.key==='Enter') homieSend()" />
+      <button id="homie-send" onclick="homieSend()">➤</button>
+    </div>
+    <div id="homie-footer">Powered by <a href="https://homelist.co.in">Homelist.co.in</a></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONFIGURATION — Replace with your actual keys/URLs
+// ============================================================
+const HOMIE_CONFIG = {
+  geminiKey: 'AIzaSyAHs5TWmyV0SOzDhFBsVqHTXZNDJFk9Bkk',
+  // After setting up Google Apps Script, paste your Web App URL here:
+  sheetWebAppUrl: 'https://script.google.com/macros/s/AKfycbyM50u0VlbuKnKYYBODgKzfPzbukFfLwImubvdcuDRIknJjiQ2LSPNZINqPTl_ZZI5a/exec',
+  ownerEmail: 'homelist.co.in@gmail.com',
+  ownerPhone: '+91-93032 15006'
+};
+
+const HOMIE_SYSTEM = `You are Homie, a friendly AI real estate assistant for Homelist (homelist.co.in), a leading property portal in India established in 2008.
+
+ABOUT HOMELIST:
+- Website: homelist.co.in | Phone: +91-93032 15006 | Email: homelist.co.in@gmail.com
+- Based in Indore, MP. Covers pan-India listings.
+- Categories: For Rent, For Sale, For PG, New Booking, Ready to Move, Under Construction
+- Top cities: Indore (4500+ listings), Bhopal, Gurgaon, Mumbai, and 500+ cities
+- Property types: Apartment, House, Villa, Office, Shop, Plot, PG, Duplex, Bungalow
+
+YOUR CONVERSATION FLOW:
+Step 1 — When user says Buy/Rent/any property interest:
+  Ask ONE question: "Which city are you looking in?"
+
+Step 2 — After city:
+  Ask: "What type of property? (Apartment / House / Plot / Shop / PG)"
+
+Step 3 — After property type:
+  Ask: "What is your budget? And how many BHK do you need?"
+
+Step 4 — After budget/BHK:
+  Say: "Great! Let me connect you with our property expert who can show you the best options. 😊" 
+  Then ALWAYS end your reply with exactly: [COLLECT_LEAD]
+
+IMPORTANT RULES:
+- Ask only ONE question at a time
+- Keep replies under 3 lines
+- ALWAYS trigger [COLLECT_LEAD] after you have: city + property type + budget
+- If user directly asks for callback or contact, immediately output [COLLECT_LEAD]
+- Respond in Hindi if user writes in Hindi, English otherwise
+- Never make up prices — say "prices vary, our team will share exact details"
+- For listing a property: ask their details and output [COLLECT_LEAD]
+
+EXAMPLES:
+User: "buy"
+You: "Great choice! 🏠 Which city are you looking to buy in?"
+
+User: "Indore"  
+You: "Indore has amazing options! What type of property — Apartment, House, Plot, or Villa?"
+
+User: "2BHK apartment"
+You: "Perfect! What is your budget range for this 2BHK apartment?"
+
+User: "40 lakhs"
+You: "Great! Let me connect you with our property expert who has the best 2BHK options in Indore under 40 lakhs. 😊 [COLLECT_LEAD]"`;
+
+
+// ============================================================
+// CHAT STATE
+// ============================================================
+let homieOpen = false;
+let homieInitialized = false;
+
+function homieToggle() {
+  homieOpen = !homieOpen;
+  const box = document.getElementById('homie-box');
+  if (homieOpen) {
+    box.classList.add('open');
+    if (!homieInitialized) {
+      homieInitialized = true;
+      homieAddMsg('bot', "Namaste! 🙏 I'm <strong>Homie</strong>, your personal property assistant from <strong>Homelist</strong>!<br><br>Are you looking to 🏠 <strong>Buy</strong>, 🔑 <strong>Rent</strong>, or 📋 <strong>List a property</strong>?");
+    }
+    setTimeout(() => document.getElementById('homie-input').focus(), 100);
+  } else {
+    box.classList.remove('open');
+  }
+}
+
+function homieAddMsg(type, html) {
+  const msgs = document.getElementById('homie-messages');
+  const div = document.createElement('div');
+  div.className = 'homie-msg ' + type;
+  div.innerHTML = html;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function homieShowTyping() {
+  const msgs = document.getElementById('homie-messages');
+  const div = document.createElement('div');
+  div.className = 'homie-typing';
+  div.id = 'homie-typing-indicator';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function homieHideTyping() {
+  const el = document.getElementById('homie-typing-indicator');
+  if (el) el.remove();
+}
+
+function homieShowLeadForm() {
+  const msgs = document.getElementById('homie-messages');
+  const div = document.createElement('div');
+  div.className = 'homie-msg bot';
+  div.style.maxWidth = '95%';
+  div.innerHTML = `
+    <div style="margin-bottom:8px;">Please share your details and our team will call you! 📞</div>
+    <div class="homie-lead-form">
+      <input id="homie-lead-name" type="text" placeholder="Your Name *" />
+      <input id="homie-lead-phone" type="tel" placeholder="Phone Number *" />
+      <input id="homie-lead-city" type="text" placeholder="Preferred City (e.g. Indore)" />
+      <input id="homie-lead-req" type="text" placeholder="Requirement (e.g. 2BHK rent Indore)" />
+      <button onclick="homieSubmitLead()">📤 Submit — Get Callback</button>
+    </div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function homieSubmitLead() {
+  const name  = document.getElementById('homie-lead-name').value.trim();
+  const phone = document.getElementById('homie-lead-phone').value.trim();
+  const city  = document.getElementById('homie-lead-city').value.trim();
+  const req   = document.getElementById('homie-lead-req').value.trim();
+
+  if (!name || !phone) {
+    alert('Please enter your name and phone number.');
+    return;
+  }
+
+  // Remove the form
+  const forms = document.querySelectorAll('.homie-lead-form');
+  forms.forEach(f => f.closest('.homie-msg') && f.closest('.homie-msg').remove());
+
+  homieAddMsg('user', `📋 ${name} | ${phone}${city ? ' | ' + city : ''}${req ? ' | ' + req : ''}`);
+  homieAddMsg('bot', `✅ Thank you, <strong>${name}</strong>! Our team will call you at <strong>${phone}</strong> within 24 hours.<br><br>You can also reach us directly:<br>📞 <a href="tel:+919303215006" style="color:#e67e22;">+91-93032 15006</a><br>🌐 <a href="https://homelist.co.in" target="_blank" style="color:#e67e22;">homelist.co.in</a>`);
+
+  // Save to Google Sheets
+  if (HOMIE_CONFIG.sheetWebAppUrl !== 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+    try {
+      await fetch(HOMIE_CONFIG.sheetWebAppUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name, phone, city, requirement: req,
+          timestamp: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+          source: window.location.href
+        })
+      });
+    } catch(e) { console.log('Sheet save error:', e); }
+  }
+}
+
+// ============================================================
+// SMART RULE-BASED CONVERSATION ENGINE (No API needed)
+// ============================================================
+let homieStep = 0;
+let homieData = { intent: '', city: '', type: '', budget: '', bhk: '' };
+
+function homieGetReply(msg) {
+  const m = msg.toLowerCase().trim();
+
+  // STEP 0 — Detect intent
+  if (homieStep === 0) {
+    if (m.match(/buy|sale|purchase|kharidna|kharid/)) {
+      homieData.intent = 'Buy';
+      homieStep = 1;
+      return "Great choice! 🏠 Which city are you looking to buy in?";
+    } else if (m.match(/rent|kiraya|किराया|rental/)) {
+      homieData.intent = 'Rent';
+      homieStep = 1;
+      return "Perfect! 🔑 Which city are you looking to rent in?";
+    } else if (m.match(/pg|paying guest|hostel/)) {
+      homieData.intent = 'PG';
+      homieStep = 1;
+      return "Sure! 🏡 Which city are you looking for PG accommodation?";
+    } else if (m.match(/list|sell|bech|property dena|apni property/)) {
+      homieData.intent = 'List';
+      homieStep = 5;
+      return "We'd love to list your property! 📋 Please share your details and our team will contact you within 24 hours.";
+    } else if (m.match(/plot|land|zameen/)) {
+      homieData.intent = 'Plot';
+      homieStep = 1;
+      return "Plots are a great investment! 📍 Which city are you interested in?";
+    } else if (m.match(/commercial|office|shop|dukan/)) {
+      homieData.intent = 'Commercial';
+      homieStep = 1;
+      return "Great! 🏢 Which city are you looking for commercial property in?";
+    } else if (m.match(/hello|hi|hey|namaste|helo|hii/)) {
+      return "Namaste! 🙏 Are you looking to 🏠 <strong>Buy</strong>, 🔑 <strong>Rent</strong>, or 📋 <strong>List a property</strong>?";
+    } else if (m.match(/help|kya|what|info|details/)) {
+      return "I can help you find properties across India! 😊 Are you looking to 🏠 <strong>Buy</strong>, 🔑 <strong>Rent</strong>, 🏡 <strong>PG</strong>, or 📋 <strong>List your property</strong>?";
+    } else {
+      // Treat any other message as a search intent
+      homieData.intent = 'Property';
+      homieStep = 1;
+      return "I'd love to help! 😊 Which city are you looking for a property in?";
+    }
+  }
+
+  // STEP 1 — Get city
+  if (homieStep === 1) {
+    homieData.city = msg;
+    homieStep = 2;
+    if (homieData.intent === 'PG') {
+      return `Great! ${msg} has many PG options. What is your monthly budget for PG?`;
+    }
+    return `${msg} is a great choice! 🌆 What type of property are you looking for?<br><br>🏢 Apartment &nbsp;|&nbsp; 🏠 House &nbsp;|&nbsp; 🏡 Villa &nbsp;|&nbsp; 📐 Plot &nbsp;|&nbsp; 🏪 Shop`;
+  }
+
+  // STEP 2 — Get property type
+  if (homieStep === 2) {
+    homieData.type = msg;
+    homieStep = 3;
+    if (m.match(/plot|land/)) {
+      return `Got it! 📐 What is your budget for the plot in ${homieData.city}?`;
+    }
+    return `Nice! How many BHK are you looking for? (1BHK / 2BHK / 3BHK / 4BHK)`;
+  }
+
+  // STEP 3 — Get BHK
+  if (homieStep === 3) {
+    homieData.bhk = msg;
+    homieStep = 4;
+    return `Perfect! 💰 What is your ${homieData.intent === 'Rent' ? 'monthly rent' : 'total'} budget?`;
+  }
+
+  // STEP 4 — Get budget → trigger lead form
+  if (homieStep === 4) {
+    homieData.budget = msg;
+    homieStep = 5;
+    return `SHOW_LEAD_FORM:Excellent! 🎉 We have great ${homieData.bhk} ${homieData.type} options in ${homieData.city} within your budget.<br><br>Let me connect you with our property expert right away! 👇`;
+  }
+
+  // STEP 5 — List property or fallback
+  if (homieStep === 5) {
+    return `SHOW_LEAD_FORM:Please share your details below and our team will contact you within 24 hours! 😊`;
+  }
+
+  // Post lead form — answer general questions
+  if (m.match(/contact|call|phone|number/)) {
+    return `You can reach us at:<br>📞 <a href="tel:+919303215006" style="color:#e67e22;">+91-93032 15006</a><br>📧 homelist.co.in@gmail.com<br>🌐 <a href="https://homelist.co.in" target="_blank" style="color:#e67e22;">homelist.co.in</a>`;
+  }
+  if (m.match(/thank|thanks|shukriya|dhanyawad/)) {
+    return `You're welcome! 😊 Our team will be in touch soon. Visit <a href="https://homelist.co.in" target="_blank" style="color:#e67e22;">homelist.co.in</a> to browse all listings!`;
+  }
+
+  homieStep = 0;
+  return "Can I help you with something else? Are you looking to 🏠 <strong>Buy</strong>, 🔑 <strong>Rent</strong>, or 📋 <strong>List a property</strong>?";
+}
+
+async function homieAsk(userMsg) {
+  homieShowTyping();
+  await new Promise(r => setTimeout(r, 600)); // Simulate thinking
+  homieHideTyping();
+
+  const reply = homieGetReply(userMsg);
+
+  if (reply.startsWith('SHOW_LEAD_FORM:')) {
+    const text = reply.replace('SHOW_LEAD_FORM:', '');
+    homieAddMsg('bot', text);
+    setTimeout(homieShowLeadForm, 400);
+  } else {
+    homieAddMsg('bot', reply);
+  }
+}
+
+function homieSend() {
+  const input = document.getElementById('homie-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  homieAddMsg('user', msg);
+  homieAsk(msg);
+}
+</script>
+
+<!-- ============================================================
+     END OF HOMELIST HOMIE WIDGET
+     ============================================================ -->
+</body>
+</html>
