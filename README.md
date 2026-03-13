@@ -91,4 +91,4 @@ MIT License — free to use and modify for any project.
 
 ## 🙏 Credits
 
-Built for [Homelist.co.in](https://homelist.co.in) — a real estate portal based in Indore, India.
+Built by Krati Bhatia for [Homelist.co.in](https://homelist.co.in) — a real estate portal based in Indore, India.
