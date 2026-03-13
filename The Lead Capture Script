@@ -1,0 +1,117 @@
+// ============================================================
+// HOMELIST LEAD CAPTURE — Google Apps Script
+// ============================================================
+// HOW TO SET UP (5 minutes):
+//
+// 1. Go to script.google.com
+// 2. Click "+ New Project"
+// 3. Delete existing code and paste THIS entire file
+// 4. Change OWNER_EMAIL below to your email
+// 5. Click "Deploy" → "New Deployment"
+// 6. Type: Web App | Execute as: Me | Who has access: Anyone
+// 7. Click Deploy → Copy the Web App URL
+// 8. Paste that URL into homelist-chat-widget.html → sheetWebAppUrl
+// ============================================================
+
+const OWNER_EMAIL     = 'YOUR_EMAIL@gmail.com'; // <-- Your email here
+const SHEET_NAME      = 'Homelist Leads';
+const SPREADSHEET_URL = 'YOUR_GOOGLE_SHEET_URL'; // <-- Your Google Sheet URL here
+
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    saveToSheet(data);
+    sendEmailNotification(data);
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'success' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'Homelist Lead API is running ✅' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function saveToSheet(data) {
+  const ss = SpreadsheetApp.openByUrl(SPREADSHEET_URL);
+  let sheet = ss.getSheetByName(SHEET_NAME);
+
+  // Create sheet with headers if it doesn't exist
+  if (!sheet) {
+    sheet = ss.insertSheet(SHEET_NAME);
+    sheet.appendRow([
+      '📅 Date & Time',
+      '👤 Name',
+      '📞 Phone',
+      '🏙️ City',
+      '🏠 Requirement',
+      '🌐 Source Page',
+      '✅ Status'
+    ]);
+
+    // Style header row
+    const headerRange = sheet.getRange(1, 1, 1, 7);
+    headerRange.setBackground('#1a5276');
+    headerRange.setFontColor('#ffffff');
+    headerRange.setFontWeight('bold');
+    headerRange.setFontSize(11);
+    sheet.setFrozenRows(1);
+
+    // Set column widths
+    sheet.setColumnWidth(1, 160);
+    sheet.setColumnWidth(2, 140);
+    sheet.setColumnWidth(3, 130);
+    sheet.setColumnWidth(4, 120);
+    sheet.setColumnWidth(5, 250);
+    sheet.setColumnWidth(6, 200);
+    sheet.setColumnWidth(7, 100);
+  }
+
+  // Add lead row
+  sheet.appendRow([
+    data.timestamp || new Date().toLocaleString('en-IN'),
+    data.name       || '',
+    data.phone      || '',
+    data.city       || '',
+    data.requirement || '',
+    data.source     || '',
+    'New Lead 🔔'
+  ]);
+
+  // Highlight new row in light orange
+  const lastRow = sheet.getLastRow();
+  sheet.getRange(lastRow, 1, 1, 7).setBackground('#fef9e7');
+}
+
+function sendEmailNotification(data) {
+  const subject = `🏠 New Lead from Homelist: ${data.name || 'Unknown'} — ${data.city || 'N/A'}`;
+
+  const body = `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏠 NEW LEAD — HOMELIST.CO.IN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+👤 Name        : ${data.name || 'Not provided'}
+📞 Phone       : ${data.phone || 'Not provided'}
+🏙️  City        : ${data.city || 'Not specified'}
+🏠 Requirement : ${data.requirement || 'Not specified'}
+🕐 Time        : ${data.timestamp || new Date().toLocaleString('en-IN')}
+🌐 Source      : ${data.source || 'homelist.co.in'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 View all leads in your sheet:
+${SpreadsheetApp.openByUrl(SPREADSHEET_URL).getUrl()}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Reply to this lead quickly for best conversion!
+Team Homelist | YOUR_WEBSITE_URL | YOUR_PHONE_NUMBER
+  `;
+
+  GmailApp.sendEmail(OWNER_EMAIL, subject, body);
+}
